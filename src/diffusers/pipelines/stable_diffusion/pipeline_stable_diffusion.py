@@ -113,7 +113,7 @@ class StableDiffusionPipeline(DiffusionPipeline):
     def __call__(
         self,
         prompt: Union[str, List[str]],
-        arg_text_embeddings = None,
+        arg_text_embeddings=None,
         height: Optional[int] = 512,
         width: Optional[int] = 512,
         num_inference_steps: Optional[int] = 50,
@@ -212,6 +212,8 @@ class StableDiffusionPipeline(DiffusionPipeline):
             )
             text_input_ids = text_input_ids[:, : self.tokenizer.model_max_length]
         text_embeddings = self.text_encoder(text_input_ids.to(self.device))[0]
+
+        t_text_embeddings = text_embeddings.detach().clone()
 
         if arg_text_embeddings is not None:
             text_embeddings = arg_text_embeddings
@@ -316,6 +318,6 @@ class StableDiffusionPipeline(DiffusionPipeline):
             image = self.numpy_to_pil(image)
 
         if not return_dict:
-            return (image, has_nsfw_concept)
+            return (image, has_nsfw_concept, t_text_embeddings)
 
         return StableDiffusionPipelineOutput(images=image, nsfw_content_detected=has_nsfw_concept)
